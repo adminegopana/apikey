@@ -1,4 +1,6 @@
 {
-  "username": "admin",
-  "password": "ayam123"
+  "valid_users": [
+    "admin",
+    "operator"
+  ]
 }
