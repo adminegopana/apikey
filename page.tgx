@@ -1,0 +1,133 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAdminAuth } from '@/components/admin-auth-provider'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { LogOut, Plus, Users } from 'lucide-react'
+import { JobsTable } from '@/components/admin/jobs-table'
+import { WorkersTable } from '@/components/admin/workers-table'
+import { AddJobDialog } from '@/components/admin/add-job-dialog'
+import { StatsCards } from '@/components/admin/stats-cards'
+import { LogsTable } from '@/components/admin/logs-table'
+
+export default function AdminDashboard() {
+  const { isAuthenticated, logout, isLoading } = useAdminAuth()
+  const router = useRouter()
+  const [showAddJob, setShowAddJob] = useState(false)
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/admin/login')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">TESDA TREVON IS HERE</h1>
+              <p className="text-sm text-gray-500">Manage jobs, workers, and system settings</p>
+            </div>
+            <Button variant="outline" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[500px]">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
+            <TabsTrigger value="workers">Workers</TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
+          </TabsList>
+
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <StatsCards />
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">Latest system activities will appear here</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button className="w-full" onClick={() => setShowAddJob(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Job
+                  </Button>
+                  <Button className="w-full" variant="outline">
+                    <Users className="h-4 w-4 mr-2" />
+                    View All Workers
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Job Management</h2>
+              <Button onClick={() => setShowAddJob(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Job
+              </Button>
+            </div>
+            <JobsTable />
+          </TabsContent>
+
+          {/* Workers Tab */}
+          <TabsContent value="workers" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Worker Management</h2>
+            </div>
+            <WorkersTable />
+          </TabsContent>
+
+          {/* Logs Tab */}
+          <TabsContent value="logs" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">System Logs</h2>
+            </div>
+            <LogsTable />
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Add Job Dialog */}
+      <AddJobDialog open={showAddJob} onOpenChange={setShowAddJob} />
+    </div>
+  )
+}
